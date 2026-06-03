@@ -1,82 +1,53 @@
 import os
-import sys
-import tempfile
-import pandas as pd
-import numpy as np
-from fastapi import FastAPI, UploadFile, File, HTTPException
+import pickle
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-# backend 폴더 위치를 기준으로 상위 폴더(car_project)를 sys.path에 추가하여 analysis 모듈을 import
-base_dir = os.path.dirname(os.path.abspath(__file__))
-project_dir = os.path.dirname(base_dir)
-sys.path.append(project_dir)
-
-from analysis.predict_anomaly import predict_from_excel
+from pydantic import BaseModel
 
 app = FastAPI()
 
-# ngrok 등 외부 유동 도메인 요청을 차단하지 않도록 CORS 허용 오리진을 전면 개방
+# --- 모델 경로 및 로드 설정 ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "models", "master_model.pth")
+META_PATH = os.path.join(BASE_DIR, "models", "model_meta.pkl")
+
+# 모델 메모리 적재 예시 (PyTorch 등을 사용하는 경우 주석 해제하여 사용)
+# @app.on_event("startup")
+# def load_ml_models():
+#     global model, meta_data
+#     if os.path.exists(META_PATH):
+#         with open(META_PATH, 'rb') as f:
+#             meta_data = pickle.load(f)
+#     # if os.path.exists(MODEL_PATH):
+#     #     model = torch.load(MODEL_PATH)
+#     print(f"Model Path: {MODEL_PATH}")
+
+# Vercel 등 프론트엔드 도메인 환경 변수 (기본값은 로컬 테스트용)
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+
+# CORS 설정: 프론트엔드 도메인만 허용
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.post("/api/upload")
-async def upload_file(file: UploadFile = File(...)):
-    """
-    클라이언트에서 업로드한 엑셀 파일을 임시 저장하고,
-    기존 predict_anomaly 모듈의 분석 로직을 거쳐
-    1초 내로(초경량 JSON 직렬화) 불량 판정 결과를 반환합니다.
-    """
-    if not file.filename.endswith('.xlsx') and not file.filename.endswith('.xls'):
-        raise HTTPException(status_code=400, detail="엑셀 파일만 업로드 가능합니다.")
-        
-    try:
-        # 1. 파일을 임시 위치에 저장
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp:
-            content = await file.read()
-            tmp.write(content)
-            tmp_path = tmp.name
-            
-        # 2. 분석 모듈 호출 (기존 에셋 완벽 통합)
-        results_df = predict_from_excel(tmp_path)
-        
-        # 3. 데이터 후처리 (JSON 직렬화 호환성을 위해 NaN을 None으로 치환)
-        results_df = results_df.replace({np.nan: None})
-        
-        # 4. dict 리스트로 직렬화하여 반환 (가벼운 순수 JSON)
-        data_records = results_df.to_dict(orient='records')
-        
-        return {
-            "status": "success",
-            "message": "데이터 분석이 완료되었습니다.",
-            "data": data_records
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        # 임시 파일 삭제
-        if 'tmp_path' in locals() and os.path.exists(tmp_path):
-            os.remove(tmp_path)
+class PredictRequest(BaseModel):
+    data: str
 
-@app.get("/api/data")
-def get_data():
-    return {
-        "status": "success", 
-        "message": "백엔드 서버 구동 중. /api/upload 엔드포인트를 통해 데이터를 전송하세요."
-    }
+@app.get("/")
+def read_root():
+    return {"message": "Hello from Render Backend API"}
 
-# 프론트엔드 정적 파일 서빙 (항상 API 라우트보다 아래에 선언)
-from fastapi.staticfiles import StaticFiles
-frontend_dir = os.path.join(project_dir, "frontend")
-app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+@app.post("/api/predict")
+def predict(req: PredictRequest):
+    # 실제로는 여기서 모델 예측 등을 수행합니다.
+    return {"result": f"Processed successfully: {req.data}"}
 
 if __name__ == "__main__":
     import uvicorn
-    host = os.environ.get("HOST", "127.0.0.1")
+    # Render가 할당하는 PORT 환경 변수를 최우선으로 가져오도록 설정
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host=host, port=port, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=port)

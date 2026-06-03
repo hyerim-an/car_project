@@ -1,46 +1,53 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const fetchBtn = document.getElementById('fetchDataBtn');
-    const resultBox = document.getElementById('resultBox');
+/**
+ * 백엔드 서버 URL 설정
+ * 로컬 테스트: "http://localhost:8000"
+ * 운영 배포 후: "https://my-backend-app.onrender.com" 등 Render 주소로 교체
+ */
+const BACKEND_URL = "http://localhost:8000";
 
-    // 환경에 따라 동적으로 백엔드 주소를 설정할 수 있도록 변수화
-    // 초기 로컬 환경 기준 백엔드 주소 (CORS가 허용됨)
-    const API_BASE_URL = '';
+document.addEventListener("DOMContentLoaded", () => {
+    const sendBtn = document.getElementById("sendBtn");
+    const inputText = document.getElementById("inputText");
+    const resultBox = document.getElementById("resultBox");
 
-    fetchBtn.addEventListener('click', async () => {
-        fetchBtn.disabled = true;
-        fetchBtn.innerText = '요청 중...';
-        resultBox.innerText = '백엔드 서버와 통신하는 중...';
-        resultBox.style.backgroundColor = '#ecf0f1';
-        resultBox.style.color = '#34495e';
+    sendBtn.addEventListener("click", async () => {
+        const data = inputText.value.trim();
+        if (!data) {
+            alert("데이터를 입력해주세요.");
+            inputText.focus();
+            return;
+        }
+
+        resultBox.textContent = "전송 중...";
+        sendBtn.disabled = true;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/data`);
-            
+            const response = await fetch(`${BACKEND_URL}/api/predict`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ data: data })
+            });
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            // 백엔드가 뱉은 정제된 JSON 데이터
-            const data = await response.json();
-            
-            // 프론트엔드가 JSON을 파싱하여 동적으로 DOM을 업데이트
-            resultBox.innerHTML = `
-                <strong style="color: #27ae60;">${data.message}</strong>
-                <div style="margin-top: 10px; font-size: 0.85rem; color: #7f8c8d;">
-                    응답 데이터: [${data.data.items.join(', ')}]
-                </div>
-            `;
-            resultBox.style.backgroundColor = '#e8f8f5';
+
+            const json = await response.json();
+            resultBox.textContent = `결과: ${json.result}`;
         } catch (error) {
-            console.error('Error fetching data:', error);
-            resultBox.innerHTML = `
-                <strong style="color: #e74c3c;">연결 실패</strong>
-                <div style="margin-top: 5px; font-size: 0.85rem;">서버가 실행 중인지 확인하세요.</div>
-            `;
-            resultBox.style.backgroundColor = '#fdedec';
+            console.error("Error:", error);
+            resultBox.textContent = `오류 발생: ${error.message}`;
         } finally {
-            fetchBtn.disabled = false;
-            fetchBtn.innerText = '데이터 다시 불러오기';
+            sendBtn.disabled = false;
+        }
+    });
+    
+    // 엔터키 입력 지원
+    inputText.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            sendBtn.click();
         }
     });
 });
