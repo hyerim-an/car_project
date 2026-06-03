@@ -1,0 +1,8 @@
+{
+  "name": "fullstack",
+  "description": "범용적이고 확장성 높은 풀스택 아키텍트",
+  "system_prompt_file": "system_prompt.md",
+  "enable_mcp_tools": false,
+  "enable_write_tools": true,
+  "enable_subagent_tools": false
+}

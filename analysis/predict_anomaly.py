@@ -57,8 +57,7 @@ def predict_from_excel(file_path):
     meta_path = os.path.join(base_dir, 'model_meta.pkl')
     
     if not os.path.exists(meta_path) or not os.path.exists(model_path):
-        print("에러: 모델 파일(master_model.pth) 또는 메타데이터 파일(model_meta.pkl)이 존재하지 않습니다. 먼저 학습을 진행해주세요.")
-        return None
+        raise ValueError("에러: 모델 파일(master_model.pth) 또는 메타데이터 파일(model_meta.pkl)이 존재하지 않습니다. 먼저 학습을 진행해주세요.")
         
     # 1. 메타데이터 및 스케일러 불러오기
     with open(meta_path, 'rb') as f:
@@ -74,16 +73,18 @@ def predict_from_excel(file_path):
     model.load_state_dict(torch.load(model_path))
     model.eval()
     
-    # 3. 새로운 데이터 불러오기 ('Raw data' 시트)
+    # 3. 새로운 데이터 불러오기 ('Raw data' 시트 없으면 기본 시트)
     try:
         df_raw = pd.read_excel(file_path, sheet_name='Raw data')
-    except Exception as e:
-        print(f"데이터를 불러오는 데 실패했습니다: {e}")
-        return None
+    except Exception:
+        try:
+            df_raw = pd.read_excel(file_path)
+        except Exception as e:
+            raise ValueError(f"데이터를 불러오는 데 실패했습니다: {e}")
         
     if not all(col in df_raw.columns for col in columns_to_use):
-        print("에러: 분석에 필요한 열이 파일에 존재하지 않습니다.")
-        return None
+        missing = [col for col in columns_to_use if col not in df_raw.columns]
+        raise ValueError(f"분석에 필요한 열이 파일에 존재하지 않습니다. 누락된 열: {missing}")
         
     data = df_raw[columns_to_use].copy()
     

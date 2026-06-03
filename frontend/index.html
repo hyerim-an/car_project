@@ -371,9 +371,9 @@
     </div>
 
     <script>
-        const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                            ? 'http://127.0.0.1:8000' 
-                            : 'https://api.yourdomain.com';
+        // [API 통신 설정]
+        // 백엔드가 프론트엔드 화면까지 같이 제공(Static Serve)하므로, 별도 도메인 명시 없이 상대경로('/')로 호출합니다.
+        const BACKEND_URL = '';
         
         let chartInstance = null;
         let globalAnomalyData = [];
