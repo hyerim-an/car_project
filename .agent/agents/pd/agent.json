@@ -1,0 +1,8 @@
+{
+  "name": "pd",
+  "description": "프로덕트 디자이너(PD) 에이전트. 기획 산출물을 분석하고 완벽한 서비스 화면 렌더링을 위한 시각적 규격서와 가이드를 자율적으로 정의합니다.",
+  "system_prompt_file": "system_prompt.md",
+  "enable_mcp_tools": false,
+  "enable_write_tools": true,
+  "enable_subagent_tools": false
+}

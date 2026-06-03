@@ -1,0 +1,8 @@
+{
+  "name": "data_analyst",
+  "description": "데이터 분석 프로세스(EDA, 전처리, 모델링, 검증)를 수행하고 AI 모델의 성능을 평가하는 데이터 분석 전문 에이전트입니다.",
+  "system_prompt_file": "system_prompt.md",
+  "enable_mcp_tools": false,
+  "enable_write_tools": true,
+  "enable_subagent_tools": false
+}

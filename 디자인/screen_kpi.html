@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hyundai Intelligent Predictive Maintenance</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#353534",
+                      "on-error-container": "#ffdad6",
+                      "primary": "#abc7ff",
+                      "error-container": "#93000a",
+                      "warning": "#F39C12",
+                      "primary-fixed-dim": "#abc7ff",
+                      "on-secondary": "#003544",
+                      "on-background": "#e5e2e1",
+                      "inverse-surface": "#e5e2e1",
+                      "background": "#131313",
+                      "surface-container-lowest": "#0e0e0e",
+                      "text-secondary": "#B3B3B3",
+                      "primary-container": "#002c5f",
+                      "on-tertiary": "#003919",
+                      "on-surface-variant": "#c4c6d1",
+                      "secondary": "#56d5ff",
+                      "on-surface": "#e5e2e1",
+                      "surface-container-high": "#2a2a2a",
+                      "on-tertiary-container": "#00ab59",
+                      "surface-sidebar": "#161616",
+                      "surface-container-highest": "#353534",
+                      "inverse-primary": "#3f5e94",
+                      "primary-hover": "#003E8A",
+                      "on-tertiary-fixed-variant": "#005228",
+                      "surface-container-low": "#1c1b1b",
+                      "border-hover": "#555555",
+                      "surface-container": "#201f1f",
+                      "on-primary-fixed-variant": "#25467a",
+                      "tertiary": "#4ae183",
+                      "tertiary-fixed": "#6bfe9c",
+                      "on-error": "#690005",
+                      "tertiary-container": "#003517",
+                      "on-primary": "#052f62",
+                      "error": "#E74C3C",
+                      "on-primary-fixed": "#001b3f",
+                      "surface-tint": "#abc7ff",
+                      "secondary-fixed": "#b8eaff",
+                      "surface": "#131313",
+                      "on-secondary-container": "#003847",
+                      "outline-variant": "#43474f",
+                      "on-secondary-fixed-variant": "#004d61",
+                      "accent-hover": "#0082A0",
+                      "surface-dim": "#131313",
+                      "tertiary-fixed-dim": "#4ae183",
+                      "on-secondary-fixed": "#001f28",
+                      "outline": "#8d909a",
+                      "secondary-container": "#00a9d0",
+                      "inverse-on-surface": "#313030",
+                      "on-primary-container": "#7695ce",
+                      "border-subtle": "#333333",
+                      "surface-bright": "#393939",
+                      "secondary-fixed-dim": "#56d5ff",
+                      "primary-fixed": "#d7e3ff",
+                      "on-tertiary-fixed": "#00210c",
+                      "text-primary": "#FFFFFF",
+                      "surface-card": "#1E1E1E"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "chart-height": "400px",
+                      "container-padding": "24px",
+                      "header-height": "64px",
+                      "sidebar-width": "240px",
+                      "kpi-height": "120px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "card-header": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "kpi-display": ["Inter"],
+                      "headline-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "card-header": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                      "kpi-display": ["36px", {"lineHeight": "44px", "fontWeight": "700"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pulse-anomaly {
+            box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #131313; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333333; border-radius: 2px; }
+        .grid-bg {
+            background-image: linear-gradient(#1e1e1e 1px, transparent 1px), linear-gradient(90deg, #1e1e1e 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-hidden flex h-screen">
+<!-- Sidebar Navigation -->
+<aside class="w-sidebar-width bg-surface-sidebar flex flex-col h-full z-50">
+<div class="px-6 h-header-height flex items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">precision_manufacturing</span>
+<span class="font-headline-lg text-headline-lg text-primary tracking-tight">Hyundai</span>
+</div>
+</div>
+<nav class="mt-8 px-4 flex-1 space-y-2">
+<a class="flex items-center gap-3 bg-primary-container text-primary rounded-xl px-4 py-3 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-card-header text-card-header">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-text-secondary hover:bg-surface-container-high rounded-xl px-4 py-3 transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-card-header text-card-header">Analysis</span>
+</a>
+<a class="flex items-center gap-3 text-text-secondary hover:bg-surface-container-high rounded-xl px-4 py-3 transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-card-header text-card-header">History</span>
+</a>
+<a class="flex items-center gap-3 text-text-secondary hover:bg-surface-container-high rounded-xl px-4 py-3 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-card-header text-card-header">Settings</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<div class="bg-surface-container-low rounded-xl p-4 border border-border-subtle">
+<p class="text-label-sm font-label-sm text-text-secondary mb-2">시스템 상태</p>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="text-body-md font-body-md text-on-surface">정상 가동 중</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col relative overflow-y-auto custom-scrollbar">
+<!-- TopAppBar -->
+<header class="h-header-height bg-surface border-b border-border-subtle flex justify-between items-center px-gutter sticky top-0 z-40">
+<div class="flex items-center gap-4">
+<h1 class="font-headline-lg text-headline-lg text-text-primary">종합 대시보드</h1>
+<span class="px-2 py-1 bg-surface-container-high rounded text-label-sm font-label-sm text-text-secondary">공정 ID: WD-240-B</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-secondary-container hover:bg-accent-hover text-white px-6 py-2 rounded-xl flex items-center gap-2 transition-all duration-200 shadow-[0_4px_12px_rgba(0,170,210,0.4)] active:scale-95">
+<span class="material-symbols-outlined">upload</span>
+<span class="font-card-header text-card-header">원시 데이터 업로드</span>
+</button>
+</div>
+</header>
+<div class="p-container-padding space-y-6">
+<!-- Row 1: KPI Cards -->
+<div class="grid gap-6 h-kpi-height grid-cols-5"><!-- Total Welds -->
+<div class="bg-surface-card border border-border-subtle rounded-xl p-4 flex flex-col justify-between hover:border-border-hover transition-colors">
+<div class="flex justify-between items-start">
+<span class="text-label-sm font-label-sm text-text-secondary">총 용접 횟수</span>
+<span class="material-symbols-outlined text-primary">dynamic_feed</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-kpi-display font-kpi-display text-text-primary">12,842</span>
+<span class="text-label-sm font-label-sm text-tertiary">+12%</span>
+</div>
+</div>
+<!-- Operating Rate -->
+<div class="bg-surface-card border border-border-subtle rounded-xl p-4 flex flex-col justify-between hover:border-border-hover transition-colors">
+<div class="flex justify-between items-start">
+<span class="text-label-sm font-label-sm text-text-secondary">가동률</span>
+<span class="material-symbols-outlined text-tertiary">speed</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-kpi-display font-kpi-display text-text-primary">94.2%</span>
+<span class="text-label-sm font-label-sm text-tertiary">정상</span>
+</div>
+</div>
+<!-- Pitting Defect -->
+<div class="bg-surface-card border border-border-subtle rounded-xl p-4 flex flex-col justify-between hover:border-border-hover transition-colors">
+<div class="flex justify-between items-start">
+<span class="text-label-sm font-label-sm text-text-secondary">파임 불량</span>
+<span class="material-symbols-outlined text-warning">texture</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-kpi-display font-kpi-display text-warning">3</span>
+<span class="text-label-sm font-label-sm text-text-secondary">건</span>
+</div>
+</div>
+<!-- Welding Insufficiency -->
+<div class="bg-surface-card border border-border-subtle rounded-xl p-4 flex flex-col justify-between hover:border-border-hover transition-colors">
+<div class="flex justify-between items-start">
+<span class="text-label-sm font-label-sm text-text-secondary">용접 부족</span>
+<span class="material-symbols-outlined text-warning">signal_cellular_0_bar</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-kpi-display font-kpi-display text-warning">1</span>
+<span class="text-label-sm font-label-sm text-text-secondary">건</span>
+</div>
+</div>
+<!-- Crack Occurrence -->
+<div class="bg-surface-card border border-border-subtle rounded-xl p-4 flex flex-col justify-between hover:border-border-hover transition-colors">
+<div class="flex justify-between items-start">
+<span class="text-label-sm font-label-sm text-text-secondary">크랙 발생</span>
+<span class="material-symbols-outlined text-error">warning</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-kpi-display font-kpi-display text-error">2</span>
+<span class="text-label-sm font-label-sm text-text-secondary">건</span>
+</div>
+</div></div>
+<!-- Row 2: Analysis & Logs -->
+<div class="grid grid-cols-12 gap-6 h-chart-height">
+<!-- Real-time Line Chart -->
+<div class="col-span-8 bg-surface-card border border-border-subtle rounded-xl overflow-hidden relative flex flex-col">
+<div class="p-4 border-b border-border-subtle flex justify-between items-center">
+<h2 class="font-card-header text-card-header text-text-primary">실시간 용접 파형 분석</h2>
+<div class="flex gap-4">
+<div class="flex items-center gap-1">
+<span class="w-3 h-0.5 bg-primary"></span>
+<span class="text-label-sm font-label-sm text-text-secondary">Current</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-3 h-0.5 bg-secondary"></span>
+<span class="text-label-sm font-label-sm text-text-secondary">Voltage</span>
+</div>
+</div>
+</div>
+<div class="flex-1 p-6 relative grid-bg">
+<!-- Chart Mockup -->
+<div class="w-full h-full relative flex items-end">
+<!-- Threshold line -->
+<div class="absolute top-[30%] left-0 w-full border-t border-dashed border-error opacity-60 z-10">
+<span class="absolute -top-5 right-0 text-[10px] text-error">Threshold 3.5kN</span>
+</div>
+<!-- SVG Path for the chart -->
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 800 200">
+<path d="M0 150 Q 50 120 100 140 T 200 100 T 300 130 T 400 60 T 500 120 T 600 90 T 700 40 T 800 110" fill="none" stroke="#abc7ff" stroke-width="2"></path>
+<path d="M0 160 Q 50 140 100 150 T 200 120 T 300 145 T 400 80 T 500 135 T 600 105 T 700 55 T 800 125" fill="none" stroke="#56d5ff" stroke-opacity="0.6" stroke-width="1.5"></path>
+<!-- Anomaly Marker -->
+<circle class="pulse-anomaly" cx="400" cy="60" fill="#E74C3C" r="6"></circle>
+<circle class="pulse-anomaly" cx="700" cy="40" fill="#E74C3C" r="6"></circle>
+</svg>
+</div>
+</div>
+</div>
+<!-- Anomaly Alarm Log -->
+<div class="col-span-4 bg-surface-card border border-border-subtle rounded-xl flex flex-col">
+<div class="p-4 border-b border-border-subtle">
+<h2 class="font-card-header text-card-header text-text-primary mb-3">이상 징후 로그</h2>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-primary-container text-white rounded-full text-label-sm font-label-sm cursor-pointer border border-transparent">전체</span>
+<span class="px-3 py-1 bg-transparent border border-border-subtle text-text-secondary rounded-full text-label-sm font-label-sm hover:border-border-hover cursor-pointer transition-colors">크랙</span>
+<span class="px-3 py-1 bg-transparent border border-border-subtle text-text-secondary rounded-full text-label-sm font-label-sm hover:border-border-hover cursor-pointer transition-colors">기공</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar">
+<table class="w-full text-left">
+<thead class="sticky top-0 bg-surface-card text-text-secondary text-label-sm border-b border-border-subtle">
+<tr>
+<th class="p-4 font-normal">시간</th>
+<th class="p-4 font-normal">항목</th>
+<th class="p-4 font-normal text-right">상태</th>
+</tr>
+</thead>
+<tbody class="text-body-md text-on-surface divide-y divide-border-subtle">
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="p-4 text-text-secondary">14:22:05</td>
+<td class="p-4">압력 강하 (Force Drop)</td>
+<td class="p-4 text-right">
+<span class="px-2 py-0.5 bg-error-container text-on-error-container rounded text-xs">Crack</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="p-4 text-text-secondary">14:15:32</td>
+<td class="p-4">전압 변동성 증가</td>
+<td class="p-4 text-right">
+<span class="px-2 py-0.5 bg-warning text-black rounded text-xs">Void</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="p-4 text-text-secondary">13:58:11</td>
+<td class="p-4">전류 피크 감지</td>
+<td class="p-4 text-right">
+<span class="px-2 py-0.5 bg-error-container text-on-error-container rounded text-xs">Crack</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="p-4 text-text-secondary">13:42:45</td>
+<td class="p-4">미세 진동 과다</td>
+<td class="p-4 text-right">
+<span class="px-2 py-0.5 bg-surface-variant text-text-secondary rounded text-xs">Lift</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="p-4 text-text-secondary">13:30:20</td>
+<td class="p-4">압력 강하 (Force Drop)</td>
+<td class="p-4 text-right">
+<span class="px-2 py-0.5 bg-error-container text-on-error-container rounded text-xs">Crack</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- AI Insight Section -->
+<div class="bg-surface-container-lowest border border-primary-container rounded-xl p-6 relative overflow-hidden">
+<!-- Background visual effect -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary-container opacity-20 blur-[80px] -z-10"></div>
+<div class="flex items-start gap-6">
+<div class="bg-primary-container p-4 rounded-xl">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-2">
+<h2 class="font-card-header text-card-header text-primary">AI 예측 분석 리포트</h2>
+<span class="text-label-sm font-label-sm text-tertiary px-2 py-0.5 bg-tertiary-container rounded">신뢰도 98.4%</span>
+</div>
+<p class="text-body-md text-on-surface leading-relaxed max-w-4xl">
+                            현재 WD-240-B 공정의 용접 데이터 분석 결과, 전극 팁의 마모도가 임계치에 도달하고 있습니다. 
+                            <span class="text-warning font-semibold">향후 24시간 내에 기공(Void) 발생 확률이 85% 이상으로 예측됩니다.</span> 
+                            비계획 정지 예방을 위해 다음 교대 근무 시간에 선제적 전극 팁 교체를 권장합니다.
+                        </p>
+<div class="mt-4 flex gap-4">
+<button class="bg-surface-container-high border border-border-subtle text-on-surface px-4 py-2 rounded-lg text-body-md font-semibold hover:bg-surface-variant transition-all">상세 예측 데이터 보기</button>
+<button class="bg-primary-container text-primary px-4 py-2 rounded-lg text-body-md font-semibold hover:bg-primary-hover hover:text-white transition-all">유지보수 일정 생성</button>
+</div>
+</div>
+<div class="w-48 h-24 bg-surface-container-high rounded-lg p-3 border border-border-subtle">
+<p class="text-[10px] text-text-secondary uppercase mb-2">마모 진행도</p>
+<div class="flex items-end gap-1 h-8">
+<div class="w-2 h-2 bg-primary rounded-t-sm"></div>
+<div class="w-2 h-3 bg-primary rounded-t-sm"></div>
+<div class="w-2 h-5 bg-primary rounded-t-sm"></div>
+<div class="w-2 h-6 bg-primary rounded-t-sm"></div>
+<div class="w-2 h-8 bg-warning rounded-t-sm animate-pulse"></div>
+</div>
+<p class="text-xl font-bold text-warning mt-1">82%</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / Credits -->
+<footer class="mt-auto p-gutter border-t border-border-subtle text-label-sm text-text-secondary flex justify-between">
+<span>© 2024 Hyundai Heavy Industries Group. All Rights Reserved.</span>
+<div class="flex gap-4">
+<span>데이터 동기화: 3초 전</span>
+<span>버전 2.4.1-Predictive</span>
+</div>
+</footer>
+</main>
+<!-- Floating UI for Detail (Optional Interactive Element) -->
+<div class="fixed bottom-10 right-10 transform translate-y-20 opacity-0 transition-all duration-500 z-[100]" id="toast">
+<div class="bg-error-container text-on-error-container px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4">
+<span class="material-symbols-outlined">warning</span>
+<div>
+<p class="font-bold">크랙 이상 감지</p>
+<p class="text-sm">스테이션 WD-240-B 실시간 파형 이상 발생</p>
+</div>
+</div>
+</div>
+<script>
+        // Micro-interaction for the toast
+        setTimeout(() => {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 5000);
+        }, 3000);
+
+        // Simulated Chart Pulse Interaction
+        const markers = document.querySelectorAll('.pulse-anomaly');
+        markers.forEach(marker => {
+            marker.addEventListener('mouseenter', () => {
+                marker.style.r = "10";
+            });
+            marker.addEventListener('mouseleave', () => {
+                marker.style.r = "6";
+            });
+        });
+    </script>
+</body></html>

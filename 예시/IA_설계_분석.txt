@@ -1,0 +1,52 @@
+Sheets found: ['1.사용법 가이드', '2. User Flow 정의', '3. IA 뎁스 표', '4. 화면 상세', '5. 약어 정리']
+
+--- Sheet: 1.사용법 가이드 ---
+Columns: ['Unnamed: 0', 'Unnamed: 1', 'Unnamed: 2']
+Sample data (first 5 rows):
+   Unnamed: 0                                                  Unnamed: 1 Unnamed: 2
+0         NaN                                         IA 설계 템플릿 — 사용법 가이드        NaN
+1         NaN  Information Architecture Design Template  |  v1.0  |  2026        NaN
+2         NaN                                                         NaN        NaN
+3         NaN                                                         NaN        NaN
+4         NaN                                                         NaN        NaN
+
+--- Sheet: 2. User Flow 정의 ---
+Columns: ['Unnamed: 0', 'Unnamed: 1', 'Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4', 'Unnamed: 5', 'Unnamed: 6', 'Unnamed: 7', 'Unnamed: 8']
+Sample data (first 5 rows):
+  Unnamed: 0    Unnamed: 1 Unnamed: 2 Unnamed: 3 Unnamed: 4                              Unnamed: 5   Unnamed: 6     Unnamed: 7    Unnamed: 8
+0    Flow ID        Flow 명     사용자 그룹        진입점     단계 No.                           단계 설명 (행동/화면)     관련 화면 ID          분기 조건            비고
+1    FID_001    마스터 데이터 등록        구직자      마이페이지          1            마이페이지 진입 후 마스터 이력서 업로드 영역 확인  UID_MYP_001              -  PDF, DOCX 지원
+2    FID_001    마스터 데이터 등록        구직자    이력서 업로드          2           PDF/DOCX 파일 드래그 앤 드롭 및 업로드 실행  UID_MYP_002  파일 형식 오류 시 경고   3초 이내 파싱 목표
+3    FID_001    마스터 데이터 등록        구직자   파싱 결과 확인          3  Gemini API를 통한 JSON 객체 구조화 및 데이터 저장 완료  UID_MYP_003              -     정형 스키마 보존
+4    FID_002  맞춤형 포트폴리오 빌드        구직자      메인 화면          1                      타겟 기업 채용 공고 URL 입력  UID_HOM_001              -   현대자동차, 토스 등
+
+--- Sheet: 3. IA 뎁스 표 ---
+Columns: ['화면 ID', 'Depth 1 (대분류)', 'Depth 2 (중분류/화면)', 'Depth 3 (세부 화면)', 'CRUD', '화면 설명', '접근 권한', '우선순위', '관련 Flow', '비고']
+Sample data (first 5 rows):
+         화면 ID Depth 1 (대분류) Depth 2 (중분류/화면) Depth 3 (세부 화면) CRUD                                              화면 설명    접근 권한 우선순위  관련 Flow                비고
+0  UID_HOM_001            메인             메인 홈               -    R  채용 공고 URL 입력창 및 생성 버튼 노출. 링크 입력 시 브랜드 분석 대기 상태 전환       전체    H  FID_002       서비스 진입 첫 화면
+1  UID_LOD_001            메인         분석 대기/진행   CI & JD 분석 모달    R               URL 스크래핑 및 로고 컬러 추출, 공고 역량 매칭 진행률 표시       전체    H  FID_002  실패 시 수동 입력 모달 전환
+2  UID_MYP_001        마스터 관리          마이페이지 홈               -    R             개인 프로필 개요, 등록된 마스터 이력서 및 프로젝트 목록 요약 노출  로그인 사용자    H  FID_001               NaN
+3  UID_MYP_002        마스터 관리       마스터 데이터 설정   이력서/경력기술서 업로드  C/U              PDF/DOCX 이력서 업로드 및 파싱된 JSON 데이터 확인/편집  로그인 사용자    H  FID_001       데이터 백오피스 핵심
+4  UID_PRV_001         포트폴리오           라이브 뷰어         실시간 프리뷰    R           분석된 브랜드 테마(CSS)와 맞춤형 프로젝트 배치가 적용된 결과물 확인       전체    H  FID_002         반응형 웹 렌더링
+
+--- Sheet: 4. 화면 상세 ---
+Columns: ['화면 ID', '화면명', '주요 구성요소', '핵심 기능/동작', '예외·빈 상태', '연결 화면 ID', '토스트 팝업 ID', '비고']
+Sample data (first 5 rows):
+         화면 ID         화면명                                                           주요 구성요소                                                                                 핵심 기능/동작                                                                    예외·빈 상태                  연결 화면 ID    토스트 팝업 ID              비고
+0  UID_HOM_001        메인 홈                      ① 채용 공고 URL 입력창\n② 포트폴리오 생성 버튼\n③ 서비스 가이드 배너  • URL 입력 후 생성 버튼 클릭 -\> 분석 대기 화면(UID\_LOD\_001) 진입\n• 마이페이지 아이콘 클릭 -\> UID\_MYP\_001 이동      • 잘못된 URL 형식: "유효한 채용 공고 링크를 입력해주세요" 안내\n• 비로그인 시 생성 시도: 로그인 유도 모달 노출  UID_LOD_001, UID_MYP_001  TST_HOM_001         서비스 진입점
+1  UID_LOD_001    분석 대기/진행              ① 로딩 애니메이션\n② 단계별 진행 상태(CI 분석/JD 매칭)\n③ 예상 소요 시간 가이드                             • 분석 완료 시 라이브 뷰어(UID\_PRV\_001)로 자동 리다이렉트\n• 스크래핑 차단 시 알림 제공  • 분석 실패(5초 초과): 수동 입력 모달(JD 텍스트 직접 복사) 제공\n• 서버 과부하: 큐잉 시스템 안내 및 대기 시간 노출  UID_PRV_001, UID_HOM_001  TST_LOD_001      AI 엔진 가동 중
+2  UID_MYP_001     마이페이지 홈                   ① 사용자 프로필 카드\n② 마스터 이력서 업로드 상태\n③ 프로젝트 아카이브 리스트                         • 이력서 관리 버튼 -\> UID\_MYP\_002 진입\n• 프로젝트 카드 클릭 -\> 상세 내용 확인 및 편집                                • 마스터 데이터 없음: "첫 이력서를 등록하여 AI 추천을 받아보세요" 안내  UID_MYP_002, UID_ATH_001          NaN         백오피스 중심
+3  UID_MYP_002  마스터 데이터 설정  ① 파일 업로드 드롭존(PDF, DOCX)\n② 파싱된 데이터 편집 필드(JSON 기반)\n③ 경력/기술 스택 목록                      • 파일 업로드 -\> Gemini API 실시간 파싱 및 구조화 저장\n• 편집 내용 저장 -\> 마스터 데이터 동기화      • 파싱 오류: "일부 정보를 추출하지 못했습니다. 수동으로 확인해주세요"\n• 지원되지 않는 파일: 형식 오류 안내 토스트               UID_MYP_001  TST_MYP_001      정확도 99% 목표
+4  UID_PRV_001      라이브 뷰어               ① 기업 맞춤형 히어로 섹션\n② 직무 최적화 프로젝트 타임라인\n③ 공유/편집 플로팅 버튼                • 반응형 미리보기 전환\n• 공유 버튼 -\> UID\_SHR\_001 이동\n• 편집 버튼 -\> UID\_EDT\_001 이동        • 매칭율 저조(20% 이하): 프로젝트 보강 제안 슬라이딩 패널 노출\n• 렌더링 오류: 재시도 버튼 및 레이아웃 복구  UID_SHR_001, UID_EDT_001          NaN  Tailwind 동적 테마
+
+--- Sheet: 5. 약어 정리 ---
+Columns: ['구분', '약어', '원어 (Full term)', '한글 명칭', '설명', '사용 예시']
+Sample data (first 5 rows):
+       구분   약어      원어 (Full term)       한글 명칭                                             설명        사용 예시
+0  ID 접두사  UID   User Interface ID    화면 고유 ID       개별 화면을 식별하는 ID. UID_[메뉴3자리]_[일련번호3자리] 형식  UID_HOM_001
+1  ID 접두사  FID             Flow ID  사용자 플로우 ID  주요 사용자 여정(User Flow) 단위 식별자. FID_[일련번호3자리] 형식      FID_001
+2  ID 접두사  TST               Toast   토스트 팝업 ID               화면 이동 없이 잠시 나타났다 사라지는 안내 메시지 식별자  TST_HOM_001
+3   메뉴 코드  HOM                Home           홈                    서비스 진입 및 채용 공고 URL 입력 메인 화면  UID_HOM_001
+4   메뉴 코드  LOD  Loading / Analysis       분석 대기                     기업 브랜드 및 공고 역량 분석 진행 상태 화면  UID_LOD_001
+

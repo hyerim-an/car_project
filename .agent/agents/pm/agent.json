@@ -1,0 +1,8 @@
+{
+  "name": "pm",
+  "description": "사용자가 지정한 예시 파일을 분석하여 기획물을 생성하는 IT 기획자(PM) 서브에이전트",
+  "system_prompt_file": "system_prompt.md",
+  "enable_mcp_tools": false,
+  "enable_write_tools": true,
+  "enable_subagent_tools": false
+}
