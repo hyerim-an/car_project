@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import torch
 import torch.nn as nn
+import requests
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -16,6 +17,7 @@ load_dotenv()
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://tbsevapmhyzfhaqzmfza.supabase.co")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 PROJECT_NAME = os.environ.get("PROJECT_NAME", "Car_project")
+N8N_WEBHOOK_URL = os.environ.get("N8N_WEBHOOK_URL", "")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI()
@@ -161,12 +163,12 @@ async def upload_file(file: UploadFile = File(...)):
         
         data_to_return = results_df.to_dict(orient="records")
         
+        total_records = len(results_df)
+        anomaly_count = int(outliers.sum())
+        normal_rate = ((total_records - anomaly_count) / total_records * 100) if total_records > 0 else 0.0
+        
         # --- Supabase 저장 로직 시작 ---
         try:
-            total_records = len(results_df)
-            anomaly_count = int(outliers.sum())
-            normal_rate = ((total_records - anomaly_count) / total_records * 100) if total_records > 0 else 0.0
-            
             crack_count = int((results_df['defect_type_name'] == '크랙발생').sum())
             pitting_count = int((results_df['defect_type_name'] == '파임불량').sum())
             lack_count = int((results_df['defect_type_name'] == '용접부족').sum())
@@ -207,6 +209,18 @@ async def upload_file(file: UploadFile = File(...)):
         except Exception as db_err:
             print(f"Supabase 저장 실패: {db_err}")
         # --- Supabase 저장 로직 끝 ---
+        
+        # --- n8n Webhook 연동 시작 ---
+        if N8N_WEBHOOK_URL:
+            try:
+                webhook_payload = {
+                    "filename": file.filename,
+                    "normal_rate": float(normal_rate)
+                }
+                requests.post(N8N_WEBHOOK_URL, json=webhook_payload, timeout=5)
+            except Exception as hook_err:
+                print(f"n8n Webhook 전송 실패: {hook_err}")
+        # --- n8n Webhook 연동 끝 ---
         
         # orient="records" 형태로 반환하여 프론트엔드의 dataRows 배열 기대 포맷과 맞춤
         return {"data": data_to_return}
