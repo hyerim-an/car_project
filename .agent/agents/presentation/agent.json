@@ -1,0 +1,8 @@
+{
+  "name": "presentation",
+  "description": "사용자가 지정한 폴더 내 문서들을 분석하여, 프로젝트 내용에 맞는 보고서(.docx, .md) 또는 발표자료(.pptx, .md)를 작성하는 전문가 에이전트",
+  "system_prompt_file": "system_prompt.md",
+  "enable_mcp_tools": false,
+  "enable_write_tools": true,
+  "enable_subagent_tools": false
+}

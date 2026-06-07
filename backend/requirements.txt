@@ -6,6 +6,8 @@ pandas
 numpy
 scikit-learn
 openpyxl
+supabase
+python-dotenv
 
 # Render 메모리 초과 방지를 위해 가벼운 CPU 버전 PyTorch 설치
 --extra-index-url https://download.pytorch.org/whl/cpu

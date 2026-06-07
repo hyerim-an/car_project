@@ -8,6 +8,15 @@ import torch.nn as nn
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from supabase import create_client, Client
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://tbsevapmhyzfhaqzmfza.supabase.co")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+PROJECT_NAME = os.environ.get("PROJECT_NAME", "Car_project")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI()
 
@@ -150,8 +159,57 @@ async def upload_file(file: UploadFile = File(...)):
         # NaN 등 JSON으로 바로 반환 불가능한 값들 None으로 치환
         results_df = results_df.replace({np.nan: None})
         
+        data_to_return = results_df.to_dict(orient="records")
+        
+        # --- Supabase 저장 로직 시작 ---
+        try:
+            total_records = len(results_df)
+            anomaly_count = int(outliers.sum())
+            normal_rate = ((total_records - anomaly_count) / total_records * 100) if total_records > 0 else 0.0
+            
+            crack_count = int((results_df['defect_type_name'] == '크랙발생').sum())
+            pitting_count = int((results_df['defect_type_name'] == '파임불량').sum())
+            lack_count = int((results_df['defect_type_name'] == '용접부족').sum())
+            
+            # 1. 업로드 요약 정보 저장
+            summary_data = {
+                "project_name": PROJECT_NAME,
+                "filename": file.filename,
+                "total_records": total_records,
+                "anomaly_count": anomaly_count,
+                "normal_rate": float(normal_rate),
+                "crack_count": crack_count,
+                "pitting_count": pitting_count,
+                "lack_count": lack_count,
+                "threshold": float(threshold)
+            }
+            summary_response = supabase.table("upload_summaries").insert(summary_data).execute()
+            
+            if summary_response.data:
+                upload_id = summary_response.data[0]['id']
+                
+                # 2. 이상치 로그 상세 정보 저장
+                if anomaly_count > 0:
+                    logs_to_insert = []
+                    for idx, row in results_df[results_df['is_anomaly']].iterrows():
+                        logs_to_insert.append({
+                            "upload_id": upload_id,
+                            "project_name": PROJECT_NAME,
+                            "row_number": int(idx) + 1,  # 프론트엔드 표시 기준 (1-based index)
+                            "anomaly_loss": float(row['anomaly_loss']),
+                            "defect_type": str(row['defect_type_name']),
+                            "welding_current": float(row['weld current(kA)']) if 'weld current(kA)' in row else None
+                        })
+                    
+                    if logs_to_insert:
+                        supabase.table("anomaly_logs").insert(logs_to_insert).execute()
+                        
+        except Exception as db_err:
+            print(f"Supabase 저장 실패: {db_err}")
+        # --- Supabase 저장 로직 끝 ---
+        
         # orient="records" 형태로 반환하여 프론트엔드의 dataRows 배열 기대 포맷과 맞춤
-        return {"data": results_df.to_dict(orient="records")}
+        return {"data": data_to_return}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
